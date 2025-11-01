@@ -11,10 +11,10 @@ on:
     paths:
       - .github/workflows/build.yml # changes to this file
       - bin/** # changes to asdf entrypoint scripts
-      - lib/** # changes to library functions
+      - lib/** # changes to library functions (bash)
       - share/** # changes to data files
       - shims/** # changes to shim scripts
-      - test/** # changes to tests
+      - test/** # changes to bats tests
       - package*.json # bats upgrade
   push:
     branches: ["main"]
@@ -22,10 +22,10 @@ on:
     paths:
       - .github/workflows/build.yml # changes to this file
       - bin/** # changes to asdf entrypoint scripts
-      - lib/** # changes to library functions
+      - lib/** # changes to library functions (bash)
       - share/** # changes to data files
       - shims/** # changes to shim scripts
-      - test/** # changes to tests
+      - test/** # changes to bats tests
       - package*.json # bats upgrade
 
 jobs:
@@ -177,15 +177,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Unstable binary
+          # Unstable binary (aarch64 only, removed armv7 per user request)
           - runs-on: ubuntu-latest
             nim-version: "ref:version-2-2"
             arch: aarch64
-
-          # Unstable binary
-          - runs-on: ubuntu-latest
-            nim-version: "ref:version-1-6"
-            arch: armv7
 
     steps:
       # Optimization: re-use cached Nim->C compilation

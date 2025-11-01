@@ -1,0 +1,11 @@
+# act configuration for local GitHub Actions testing
+
+# Use medium-sized Docker images (500MB)
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+
+# Use secrets from .env.local file if it exists
+--secret-file .env.local
+
+# Verbose output
+-v

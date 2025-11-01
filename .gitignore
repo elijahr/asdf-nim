@@ -6,3 +6,8 @@ package-lock.json
 /.tmp
 /nimbledeps
 /.test-cache
+
+# Local testing
+.env.local
+.act/
+luacov.*.out
