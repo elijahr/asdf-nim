@@ -442,7 +442,7 @@ teardown() {
   ASDF_INSTALL_TYPE="ref"
   ASDF_INSTALL_VERSION="version-2-2"
   asdf_nim_init "install"
-  expected="https://github.com/nim-lang/nightlies/releases/download/latest-version-2-2/linux_x64.tar.xz"
+  expected="https://github.com/nim-lang/nightlies/releases/latest/download-version-2-2/linux_x64.tar.xz"
   output="$(asdf_nim_download_urls | xargs)"
   assert_equal "$output" "$expected"
 }
@@ -453,7 +453,7 @@ teardown() {
   ASDF_INSTALL_TYPE="ref"
   ASDF_INSTALL_VERSION="version-2-2"
   asdf_nim_init "install"
-  expected="https://github.com/nim-lang/nightlies/releases/download/latest-version-2-2/linux_x32.tar.xz"
+  expected="https://github.com/nim-lang/nightlies/releases/latest/download-version-2-2/linux_x32.tar.xz"
   output="$(asdf_nim_download_urls | xargs)"
   assert_equal "$output" "$expected"
 }
@@ -464,7 +464,7 @@ teardown() {
   ASDF_INSTALL_TYPE="ref"
   ASDF_INSTALL_VERSION="devel"
   asdf_nim_init "install"
-  expected="https://github.com/nim-lang/nightlies/releases/download/latest-devel/linux_arm64.tar.xz"
+  expected="https://github.com/nim-lang/nightlies/releases/latest/download-devel/linux_arm64.tar.xz"
   output="$(asdf_nim_download_urls | xargs)"
   assert_equal "$output" "$expected"
 }
@@ -475,7 +475,7 @@ teardown() {
   ASDF_INSTALL_TYPE="ref"
   ASDF_INSTALL_VERSION="version-2-2"
   asdf_nim_init "install"
-  expected="https://github.com/nim-lang/nightlies/releases/download/latest-version-2-2/linux_armv7l.tar.xz"
+  expected="https://github.com/nim-lang/nightlies/releases/latest/download-version-2-2/linux_armv7l.tar.xz"
   output="$(asdf_nim_download_urls | xargs)"
   assert_equal "$output" "$expected"
 }
@@ -505,7 +505,7 @@ teardown() {
   ASDF_INSTALL_TYPE="ref"
   ASDF_INSTALL_VERSION="version-2-2"
   asdf_nim_init "install"
-  expected="https://github.com/nim-lang/nightlies/releases/download/latest-version-2-2/macosx_x64.tar.xz"
+  expected="https://github.com/nim-lang/nightlies/releases/latest/download-version-2-2/macosx_x64.tar.xz"
   output="$(asdf_nim_download_urls | xargs)"
   assert_equal "$output" "$expected"
 }
@@ -516,7 +516,7 @@ teardown() {
   ASDF_INSTALL_TYPE="ref"
   ASDF_INSTALL_VERSION="version-2-2"
   asdf_nim_init "install"
-  expected="https://github.com/nim-lang/nightlies/releases/download/latest-version-2-2/macosx_arm64.tar.xz"
+  expected="https://github.com/nim-lang/nightlies/releases/latest/download-version-2-2/macosx_arm64.tar.xz"
   output="$(asdf_nim_download_urls | xargs)"
   assert_equal "$output" "$expected"
 }

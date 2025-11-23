@@ -30,12 +30,9 @@ export PATH
 PATH="${ASDF_INSTALL_PATH}/bin:${PATH}"
 
 # Tell Nim where to find nimble package metadata and packages.
-# If a user has a custom NIMBLE_DIR, use that.
-# Otherwise if the current working directory has a nimbledeps directory, use that.
-# Otherwise, use the nimble directory within ASDF_INSTALL_PATH.
+# Only set NIMBLE_DIR if nimbledeps doesn't exist AND it's not already set.
 # see https://github.com/nim-lang/nimble#nimbles-folder-structure-and-packages
-if [ -z "${NIMBLE_DIR:-}" ] &&
-  [ ! -d "${PWD}/nimbledeps" ]; then
+if [ ! -d "${PWD}/nimbledeps" ] && [ -z "${NIMBLE_DIR:-}" ]; then
   export NIMBLE_DIR
   NIMBLE_DIR="${ASDF_INSTALL_PATH}/nimble"
 fi

@@ -41,21 +41,25 @@ setup_file() {
     # Build asdf (v0.18.0+ requires Go build)
     (cd "$ASDF_DIR" && make build)
 
-    # Copy the compiled Go binary over the old Bash script in bin/
-    cp "$ASDF_DIR/asdf" "$ASDF_DIR/bin/asdf"
-
     # Cache for future test runs
     mkdir -p "$(dirname "$ASDF_CACHE_DIR")"
     cp -R "$ASDF_DIR" "$ASDF_CACHE_DIR"
+
+    export ORIG_PATH="$PATH"
+    export PATH="$ASDF_DIR:$PATH"
   fi
 }
 
 teardown_file() {
   clear_lock git
   rm -rf "$ASDF_DIR"
+  export PATH="$ORIG_PATH"
 }
 
 setup() {
+  # Unset NIMBLE_DIR to ensure tests don't inherit from system environment
+  unset NIMBLE_DIR
+
   ASDF_NIM_TEST_TEMP="$(mktemp -t asdf-nim-integration-tests.XXXX -d)"
   export ASDF_NIM_TEST_TEMP
   ASDF_DATA_DIR="${ASDF_NIM_TEST_TEMP}/asdf"
@@ -110,6 +114,29 @@ teardown() {
 
 info() {
   echo "# ${*} …" >&3
+}
+
+@test "asdf_binary_is_go_version" {
+  # Verify we're using the Go binary version of asdf, not the Bash script
+  info "Checking asdf is Go binary"
+
+  # Get the asdf being used
+  asdf_path="$(command -v asdf)"
+  assert [[ asdf_path == "$ASDF_DIR/asdf" ]]
+
+  # Check if it's a binary using file command
+  run file "$asdf_path"
+  assert_success
+
+  # Should be executable binary, not a shell script
+  # On macOS: "Mach-O 64-bit executable"
+  # On Linux: "ELF 64-bit LSB executable"
+  # Should NOT be: "ASCII text" or "shell script"
+  refute_output --partial "ASCII text"
+  refute_output --partial "shell script"
+
+  # Verify it's an executable
+  assert [ -x "$asdf_path" ]
 }
 
 @test "nimble_configuration__without_nimbledeps" {
@@ -231,4 +258,53 @@ info() {
   run nim --version
   assert_success
   assert_output --regexp "Nim Compiler Version 2\.0\.[0-9]+"
+}
+
+@test "NIMBLE_DIR__without_nimbledeps__uses_asdf_install_path" {
+  # When no nimbledeps directory exists, NIMBLE_DIR should point to asdf install path
+  info "Checking NIMBLE_DIR without nimbledeps directory"
+  run bash --noprofile --norc -c "unset NIMBLE_DIR && export ASDF_INSTALL_PATH='${ASDF_NIM_VERSION_INSTALL_PATH}' && export ASDF_INSTALL_VERSION='ref-version-2-2' && cd '${ASDF_DATA_DIR}/plugins/nim' && source '${ASDF_DATA_DIR}/plugins/nim/bin/exec-env' && echo \"\$NIMBLE_DIR\""
+  assert_success
+  assert_output "${ASDF_NIM_VERSION_INSTALL_PATH}/nimble"
+}
+
+@test "NIMBLE_DIR__with_nimbledeps__not_set" {
+  # When nimbledeps directory exists, NIMBLE_DIR should NOT be set
+  # This allows Nimble's default behavior to detect and use nimbledeps
+  mkdir "./nimbledeps"
+
+  info "Checking NIMBLE_DIR with nimbledeps directory"
+  run bash --noprofile --norc -c "unset NIMBLE_DIR && export ASDF_INSTALL_PATH='${ASDF_NIM_VERSION_INSTALL_PATH}' && export ASDF_INSTALL_VERSION='ref-version-2-2' && cd '${ASDF_DATA_DIR}/plugins/nim' && source '${ASDF_DATA_DIR}/plugins/nim/bin/exec-env' && echo \"\$NIMBLE_DIR\""
+  assert_success
+  # NIMBLE_DIR should be empty/unset, allowing Nimble to use its default behavior
+  assert_output ""
+
+  rm -rf nimbledeps
+}
+
+@test "NIMBLE_DIR__with_nimbledeps__preserves_pre_existing" {
+  # When nimbledeps exists and NIMBLE_DIR is already set, we don't touch it
+  # (User/mise might have set it for a reason, let Nimble handle priority)
+  mkdir "./nimbledeps"
+
+  info "Checking NIMBLE_DIR preserved when pre-set with nimbledeps"
+  # Simulate something setting NIMBLE_DIR before exec-env runs
+  preset_nimble_dir="${ASDF_NIM_VERSION_INSTALL_PATH}/nimble"
+  run bash --noprofile --norc -c "export ASDF_INSTALL_PATH='${ASDF_NIM_VERSION_INSTALL_PATH}' && export ASDF_INSTALL_VERSION='ref-version-2-2' && export NIMBLE_DIR='$preset_nimble_dir' && cd '${ASDF_DATA_DIR}/plugins/nim' && source '${ASDF_DATA_DIR}/plugins/nim/bin/exec-env' && echo \"\$NIMBLE_DIR\""
+  assert_success
+  # NIMBLE_DIR should remain unchanged - we don't modify pre-existing values
+  assert_output "$preset_nimble_dir"
+
+  rm -rf nimbledeps
+}
+
+@test "NIMBLE_DIR__custom_env_var__is_preserved" {
+  # When NIMBLE_DIR is already set and NO nimbledeps exists, it should be preserved
+  custom_nimble_dir="${ASDF_NIM_TEST_TEMP}/custom_nimble"
+  mkdir -p "$custom_nimble_dir"
+
+  info "Checking NIMBLE_DIR preservation with custom value (no nimbledeps)"
+  run bash --noprofile --norc -c "export ASDF_INSTALL_PATH='${ASDF_NIM_VERSION_INSTALL_PATH}' && export ASDF_INSTALL_VERSION='ref-version-2-2' && export NIMBLE_DIR='$custom_nimble_dir' && cd '${ASDF_DATA_DIR}/plugins/nim' && source '${ASDF_DATA_DIR}/plugins/nim/bin/exec-env' && echo \"\$NIMBLE_DIR\""
+  assert_success
+  assert_output "$custom_nimble_dir"
 }

@@ -80,7 +80,7 @@ asdf_nim_find_nightly_release_url() {
   fi
 
   # Return the expected nightly URL format
-  echo "https://github.com/nim-lang/nightlies/releases/download/latest-${desired_branch}/${platform_filename}"
+  echo "https://github.com/nim-lang/nightlies/releases/latest/download-${desired_branch}/${platform_filename}"
 }
 
 # Mock asdf_nim_find_exact_nightly_url for tests that don't have network/git access
