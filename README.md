@@ -7,6 +7,7 @@ Nim plugin for [asdf](https://asdf-vm.com) version manager.
 > **🚀 mise users**: The mise plugin has moved to **[mise-nim](https://github.com/elijahr/mise-nim)**
 >
 > If you're using [mise](https://mise.jdx.dev), please use the new repository for:
+>
 > - ✅ Native mise/Lua implementation
 > - ✅ Windows support
 > - ✅ Faster performance
@@ -17,6 +18,7 @@ Nim plugin for [asdf](https://asdf-vm.com) version manager.
 Allows you to quickly install any version of [Nim](https://nim-lang.org). Works for both personal development and continuous integration.
 
 **Platform Support:**
+
 - Linux (x86_64, ARM64, i686, musl)
 - macOS (Intel, Apple Silicon)
 
@@ -34,6 +36,7 @@ asdf nim install-deps  # install system-specific dependencies for downloading & 
 ## Usage
 
 When available for the version and platform, the plugin will install pre-compiled binaries of Nim. If no binaries are available the plugin will build Nim from source.
+
 ```sh
 # latest stable version of Nim
 asdf install nim latest
@@ -104,6 +107,7 @@ In addition to global nimble package installation, asdf-nim works as expected wi
 **🚀 New:** Use the dedicated [fast-acting-nim action](https://github.com/elijahr/fast-acting-nim) for the easiest setup!
 
 Features:
+
 - ✅ **Cross-platform**: Linux, macOS, and Windows support
 - 🚀 **Fast**: Automatic caching and pre-built binaries
 - 🎯 **Simple**: One-line setup with sensible defaults

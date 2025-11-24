@@ -207,7 +207,7 @@ while [[ $# -gt 0 ]]; do
       DOCKER_PLATFORM="$2"
       shift 2
       ;;
-    -h|--help)
+    -h | --help)
       usage
       exit 0
       ;;
@@ -233,7 +233,10 @@ if [ "$RUN_ALL" = true ]; then
   run_lua_unit_tests || EXIT_CODE=$?
   run_integration_tests || EXIT_CODE=$?
 else
-  [ "$RUN_UNIT" = true ] && { run_lua_lint || EXIT_CODE=$?; run_lua_unit_tests || EXIT_CODE=$?; }
+  [ "$RUN_UNIT" = true ] && {
+    run_lua_lint || EXIT_CODE=$?
+    run_lua_unit_tests || EXIT_CODE=$?
+  }
   [ "$RUN_INTEGRATION" = true ] && { run_integration_tests || EXIT_CODE=$?; }
   [ "$RUN_DOCKER" = true ] && { run_docker_tests "$DOCKER_PLATFORM" || EXIT_CODE=$?; }
   [ "$RUN_ACT" = true ] && { run_act_tests || EXIT_CODE=$?; }
