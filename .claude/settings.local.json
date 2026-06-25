@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Read(//Users/elijahrutschman/Development/asdf/**)",
+      "Bash(npm run test:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/elijahrutschman/Development/mise-vfox-nim/",
+      "/Users/elijahrutschman/Development/fast-acting-nim",
+      "/Users/elijahrutschman/Development/mise",
+      "/Users/elijahrutschman/Development/vfox-nimble"
+    ]
+  }
+}
