@@ -49,6 +49,8 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version: "1.27.1"
+          # No go.mod in this repo; Go is only used to `go install` asdf.
+          cache: false
 
       - name: Cache test dependencies
         uses: actions/cache@v6
@@ -126,6 +128,8 @@ jobs:
         uses: actions/setup-go@v7
         with:
           go-version: "1.27.1"
+          # No go.mod in this repo; Go is only used to `go install` asdf.
+          cache: false
 
       - name: Install asdf
         run: go install github.com/asdf-vm/asdf/cmd/asdf@master
