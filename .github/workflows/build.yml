@@ -27,6 +27,17 @@ on:
       - shims/** # changes to shim scripts
       - test/** # changes to tests
       - package*.json # bats upgrade
+  schedule:
+    # Weekly. The emulated-architecture jobs are skipped on pull requests, and
+    # this plugin breaks when Nim/nimble/nightlies change rather than when the
+    # plugin does, so a time-based run is what actually catches those.
+    - cron: "0 6 * * 1"
+
+# A superseded run of this workflow is never worth finishing: the emulated
+# armv7 job alone occupies a runner for hours.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # Run tests with bats
@@ -56,8 +67,11 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .test-cache
-          key: test-cache-${{ runner.os }}-asdf-v0.18.0-nim-ref-version-2-2
+          # The key must be unique per run or the cache is written once and
+          # never refreshed; restore-keys is what actually finds it again.
+          key: test-cache-${{ runner.os }}-asdf-v0.18.0-nim-ref-version-2-2-${{ github.run_id }}
           restore-keys: |
+            test-cache-${{ runner.os }}-asdf-v0.18.0-nim-ref-version-2-2-
             test-cache-${{ runner.os }}-asdf-v0.18.0-
 
       - name: Run tests
@@ -66,8 +80,8 @@ jobs:
           [ -n "$(which bats)" ] || npm link bats
           npm run test -- --jobs 4
 
-  plugin_test_x86:
-    name: 👑${{ matrix.nim-version }}/${{ matrix.platform }}/x86_64
+  plugin_test:
+    name: 👑${{ matrix.nim-version }}/${{ matrix.platform }}/${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -78,32 +92,40 @@ jobs:
           - os: ubuntu-latest
             nim-version: "latest:1.6"
             platform: linux
+            arch: x86_64
 
           # Stable binary
           - os: ubuntu-latest
             nim-version: "latest:2.2"
             platform: linux
+            arch: x86_64
 
           # Unstable binary
           - os: ubuntu-latest
             nim-version: "ref:version-2-0"
             platform: linux
+            arch: x86_64
 
           # Unstable binary
+          # macos-latest is Apple silicon; GitHub publishes no Intel macOS
+          # image for macOS 14 or newer, so x86_64 macOS is not covered here.
           - os: macos-latest
             nim-version: "ref:devel"
             platform: macOS
+            arch: arm64
 
           # Build from source
           - os: ubuntu-latest
             nim-version: "ref:HEAD"
             platform: linux
+            arch: x86_64
 
           # Build from source
           - os: macos-latest
             asdf_nim_no_nightly_fallback: 1
             nim-version: "latest:2.2"
             platform: macOS
+            arch: arm64
 
     steps:
       # Optimization: re-use cached Nim->C compilation
@@ -112,7 +134,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache
-          key: cache-${{ matrix.os }}-${{ matrix.nim-version }}
+          key: cache-${{ matrix.os }}-${{ matrix.nim-version }}-${{ github.run_id }}
+          restore-keys: |
+            cache-${{ matrix.os }}-${{ matrix.nim-version }}-
 
       - name: Set environment variables
         if: ${{ matrix.asdf_nim_no_nightly_fallback }}
@@ -155,7 +179,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache
-          key: cache-ubuntu-latest-2.2.4
+          key: cache-ubuntu-latest-2.2.4-${{ github.run_id }}
+          restore-keys: |
+            cache-ubuntu-latest-2.2.4-
 
       - name: Install dependencies
         run: apk add --update --no-cache --upgrade bash git curl coreutils tar xz grep build-base go
@@ -177,6 +203,11 @@ jobs:
     name: 👑${{ matrix.nim-version }}/linux/${{ matrix.arch }}
     runs-on: ubuntu-latest
 
+    # Emulated under qemu; armv7 alone runs for hours. These jobs fail when Nim
+    # changes its nightlies, not when a pull request changes the plugin, so they
+    # run on pushes to main, tags, the weekly schedule and manual dispatch.
+    if: github.event_name != 'pull_request'
+
     strategy:
       fail-fast: false
       matrix:
@@ -197,7 +228,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache
-          key: cache-${{ matrix.arch }}-${{ matrix.nim-version }}
+          key: cache-${{ matrix.arch }}-${{ matrix.nim-version }}-${{ github.run_id }}
+          restore-keys: |
+            cache-${{ matrix.arch }}-${{ matrix.nim-version }}-
 
       - name: Checkout plugin
         uses: actions/checkout@v7
