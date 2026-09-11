@@ -106,6 +106,13 @@ jobs:
             platform: linux
             arch: x86_64
 
+          # Unstable binary. Nim 2.4 has no tagged release yet, so ref: is the
+          # only handle for it; switch to latest:2.4 once a tag exists.
+          - os: ubuntu-latest
+            nim-version: "ref:version-2-4"
+            platform: linux
+            arch: x86_64
+
           # Unstable binary
           # macos-latest is Apple silicon; GitHub publishes no Intel macOS
           # image for macOS 14 or newer, so x86_64 macOS is not covered here.
@@ -179,9 +186,12 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache
-          key: cache-ubuntu-latest-2.2.4-${{ github.run_id }}
+          # Must describe what is actually cached: a musl build of the
+          # version this job installs. The old key said ubuntu-latest and
+          # 2.2.4 while the job runs on alpine and installs latest:2.2.
+          key: cache-alpine-musl-latest-2.2-${{ github.run_id }}
           restore-keys: |
-            cache-ubuntu-latest-2.2.4-
+            cache-alpine-musl-latest-2.2-
 
       - name: Install dependencies
         run: apk add --update --no-cache --upgrade bash git curl coreutils tar xz grep build-base go
